@@ -3,7 +3,7 @@ version: '3'
 services:
 
   postgres:
-    image: postgres:11.3
+    image: postgres:16.2
     restart: unless-stopped
     volumes: 
       - ./postgres/data:/var/lib/postgresql/data/pgdata
@@ -14,7 +14,7 @@ services:
       PGDATA: /var/lib/postgresql/data/pgdata
 
   teamcity-server:
-    image: jetbrains/teamcity-server:2019.1
+    image: jetbrains/teamcity-server:2023.11.3
     restart: unless-stopped
     ports:
       - "8111:8111"
@@ -27,7 +27,7 @@ services:
       TEAMCITY_SERVER_MEM_OPTS: "-Xmx2g -XX:MaxPermSize=270m -XX:ReservedCodeCacheSize=350m"
 
   teamcity-agent-1:
-    image: jetbrains/teamcity-agent:2019.1
+    image: jetbrains/teamcity-agent:2023.11.3
     restart: unless-stopped
     privileged: true
     environment: 
@@ -37,4 +37,17 @@ services:
       - ./agent-1/conf:/data/teamcity_agent/conf
       - ./agent-1/docker-volumes:/var/lib/docker
     links: 
+      - teamcity-server
+
+  teamcity-agent-2:
+    image: jetbrains/teamcity-agent:2023.11.3
+    restart: unless-stopped
+    privileged: true
+    environment:
+      SERVER_URL: http://teamcity-server:8111
+      DOCKER_IN_DOCKER: start
+    volumes:
+      - ./agent-2/conf:/data/teamcity_agent/conf
+      - ./agent-2/docker-volumes:/var/lib/docker
+    links:
       - teamcity-server
